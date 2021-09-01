@@ -1,0 +1,50 @@
+on: [push]
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    
+    - uses: azure/docker-login@v1
+      with:
+        login-server: acrdemo232.azurecr.io
+        username: ${{ secrets.acr_acrdemo232_username }}
+        password: ${{ secrets.acr_acrdemo232_password }}
+    
+    - name: Build and push image to ACR
+      id: build-image
+      run: |
+        docker build "$GITHUB_WORKSPACE/" -f  "Dockerfile" -t acrdemo232.azurecr.io/aksdemo:${{ github.sha }} --label dockerfile-path=Dockerfile
+        docker push acrdemo232.azurecr.io/aksdemo:${{ github.sha }}
+    
+    - uses: azure/k8s-set-context@v1
+      with:
+         kubeconfig: ${{ secrets.aks_aksdemo_kubeConfig }}
+      id: login
+    
+    - name: Create namespace
+      run: |
+        namespacePresent=`kubectl get namespace | grep aks-demo | wc -l`
+        if [ $namespacePresent -eq 0 ]
+        then
+            echo `kubectl create namespace aks-demo`
+        fi
+
+    - uses: azure/k8s-create-secret@v1
+      with:
+        namespace: aks-demo
+        container-registry-url: acrdemo232.azurecr.io
+        container-registry-username: ${{ secrets.acr_acrdemo232_username }}
+        container-registry-password: ${{ secrets.acr_acrdemo232_password }}
+        secret-name: aksdemodockerauth
+       
+    - uses: azure/k8s-deploy@v1.2
+      with:
+        namespace: aks-demo
+        manifests: |
+          manifests/deployment-1.yml
+          manifests/service-1.yml
+        images: |
+          acrdemo232.azurecr.io/aksdemo:${{ github.sha }}
+        imagepullsecrets: |
+          aksdemodockerauth
