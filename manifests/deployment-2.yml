@@ -1,0 +1,19 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: "aksashghal-af84"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: "aksashghal-af84"
+  template:
+    metadata:
+      labels:
+        app: "aksashghal-af84"
+    spec:
+      containers:
+        - name: "aksashghal-af84"
+          image: "acrashghal.azurecr.io/aksashghal"
+          ports:
+          - containerPort: 80
