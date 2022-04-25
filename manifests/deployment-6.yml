@@ -1,0 +1,19 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: "akslab-f7cd"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: "akslab-f7cd"
+  template:
+    metadata:
+      labels:
+        app: "akslab-f7cd"
+    spec:
+      containers:
+        - name: "akslab-f7cd"
+          image: "fnacr101.azurecr.io/akslab"
+          ports:
+          - containerPort: 80
