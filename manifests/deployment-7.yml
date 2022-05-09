@@ -1,0 +1,19 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: "aksziv-4a7f"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: "aksziv-4a7f"
+  template:
+    metadata:
+      labels:
+        app: "aksziv-4a7f"
+    spec:
+      containers:
+        - name: "aksziv-4a7f"
+          image: "regziv.azurecr.io/aksziv"
+          ports:
+          - containerPort: 80
